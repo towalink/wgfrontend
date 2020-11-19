@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h3>Configured Clients</h3>
+  <div class='span-18 last'>
+    <form method="get" action="edit">
+      <table>
+        <tr>
+          <td>
+            <input type="hidden" name="id" value="{{ peerdata['Id'] }}" />
+            <input type="text" name="description" value="{{ peerdata['Description'] }}" size="40" /><br>
+            {{ peerdata['Address'] }}
+          </td>
+          <td>
+            <button type="submit" name="action" value="save">Save Data</button>
+            <button type="submit" name="action" value="delete" formaction="/" onclick="return confirm('Do you really want to delete this client?')">Delete Client</button>
+            <button type="submit" formaction="/">Return to List</button>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+{% endblock %}

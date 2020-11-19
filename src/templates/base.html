@@ -1,0 +1,15 @@
+<html>
+  <head>
+    <meta http-equiv='content-type' content='text/html; charset=utf-8' />
+    <title>Towalink WireGuard Frontend</title>
+    <link rel='stylesheet' media='screen' href='/static/layout.css' />
+  </head>
+  <body>
+    <div class='container'>
+      <div class='header'>
+        {% include 'part_header.html' %}
+      </div>
+      <div class='content'>{% block content %}{% endblock %}</div>      
+    </div>
+  </body>
+</html>

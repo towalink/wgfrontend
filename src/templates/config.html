@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h3>Client Config</h3>
+  <div class='instructions'>
+    <a href='https://www.wireguard.com/install/' target="_blank">WireGuard client installation instructions</a>
+  </div>
+  <div class='span-18 last'>
+    <form method="get" action="download">
+      <table>
+        <tr>
+          <td>
+            {{ peerdata['Description'] }}<br>
+            {{ peerdata['Address'] }}
+          </td>
+          <td>
+            <img src="/configs/{{ peerdata['Id'] }}.png" alt="QR Code">
+            <button type="submit" name="id" value="{{ peerdata['Id'] }}">Download Config</button>
+            <button type="submit" formaction=".." }}">Return</button>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+{% endblock %}
