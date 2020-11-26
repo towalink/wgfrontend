@@ -2,9 +2,9 @@
 
 A simple web frontend for configuring peers within a WireGuard configuration file to thus administer road warrior clients.
 
-There are lot of user interfaces for administering WireGuard configuration files available. However, many of them have a bunch of dependencies, require root privileges to operate, or are a hassle to set up. "wgfrontend" provides a user interface that can be easily installed by just installing a package from Python's package repository PyPi (i.e. using pip).
+There are already a lot of user interfaces for administering WireGuard configuration files available. However, many of them have a bunch of dependencies, require root privileges to operate, or are a hassle to set up. "wgfrontend" provides a user interface that can be easily installed by just installing a package from Python's package repository PyPi (i.e. using pip).
 
-IMPORTANT NOTE: This tool is in an early development stage. Be warned. It is already working but looking "ugly" (the user interface does not have any nice formatting or CSS yet).
+IMPORTANT NOTE: This tool is still in development stage. Bug reports are appreciated.
 
 This little tool is independent of the Towalink site connectivity solution (see https://towalink.readthedocs.io).
 
@@ -16,6 +16,7 @@ This little tool is independent of the Towalink site connectivity solution (see 
 - Config files for WireGuard peers can be downloaded
 - Config files for WireGuard peers are shown as QR Code
 - Assistant for initial set-up
+- Web frontend has responsive design
 - Web frontend does not run with root privileges
 - Simple installation
 

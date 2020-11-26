@@ -50,6 +50,8 @@ class WGCfg():
 
     def get_peer(self, peer):
         """Get data of the given WireGuard peer"""
+        if peer is None:
+            return None
         return self.transform_to_clientdata(peer, self.wc.peers[peer])
 
     def get_peers(self):
@@ -58,11 +60,16 @@ class WGCfg():
 
     def get_peer_byid(self, id):
         """Get data WireGuard peer with the given id"""
-        peer = next(peer for peer, peerdata in self.get_peers().items() if peerdata['Id'] == id)
+        try:
+            peer = next(peer for peer, peerdata in self.get_peers().items() if peerdata['Id'] == id)
+        except StopIteration:
+            peer = None
         return peer, self.get_peer(peer)
 
     def get_peerconfig(self, peer):
         """Get config for the given WireGuard peer"""
+        if peer is None:
+            return None, None
         peerdata = self.get_peer(peer)
         for item in self.get_interface()['_rawdata']:
             if item.startswith('# Endpoint = '):

@@ -12,49 +12,12 @@ import pwdtools
 import wgcfg
 
 
-def login_screen(from_page='..', username='', error_msg='', **kwargs):
-    """Based on https://docs.cherrypy.org/en/latest/_modules/cherrypy/lib/cptools.html"""
-    content="""
-    <form method="post" action="do_login">
-      <div align=center>
-        <span class=errormsg>%s</span>
-        <table>
-          <tr>
-            <td>
-              Login:
-            </td>
-            <td>
-              <input type="text" name="username" value="%s" size="40" />
-            </td>
-          <tr>
-            <td>
-              Password:
-            </td>
-            <td>
-              <input type="password" name="password" size="40" />
-              <input type="hidden" name="from_page" value="%s" />
-            </td>
-          </tr>
-          <tr>
-            <td colspan=2 align=right>
-              <input type="submit" value="Login" />
-            </td>
-          </tr>
-        </table>
-      </div>
-    </form>
-    """ % (error_msg, username, from_page)
-    title='Login'
-    return ('<html><body>' + content + '</body></html>').encode('utf-8')
-#    return cherrypy.tools.encode('<html><body>' + content + '</body></html>')
-
-
 class WebApp():
 
     def __init__(self, cfg):
         """Instance initialization"""
         self.cfg = cfg
-        self.jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader('templates'))
+        self.jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')))
         self.wg = wgcfg.WGCfg(self.cfg.wg_configfile, self.cfg.libdir)
 
     @cherrypy.expose
@@ -64,13 +27,21 @@ class WebApp():
             self.wg.delete_peer(peer)
         peers = self.wg.get_peers()
         tmpl = self.jinja_env.get_template('index.html')
-        return tmpl.render(peers=peers)
+        return tmpl.render(sessiondata=cherrypy.session, peers=peers)
 
     @cherrypy.expose
-    def config(self, id):
-        peer, peerdata = self.wg.get_peer_byid(id)
+    def config(self, action=None, id=None, description=None):
+        peerdata = None
+        if (action == 'save') and id:
+            peer, peerdata = self.wg.get_peer_byid(id)
+            peerdata = self.wg.update_peer(peer, description)
+        if (action == 'save') and not id:
+            peer = self.wg.create_peer(description)
+            peerdata = self.wg.get_peer(peer)
+        if not peerdata:
+            peer, peerdata = self.wg.get_peer_byid(id)
         tmpl = self.jinja_env.get_template('config.html')
-        return tmpl.render(peerdata=peerdata)
+        return tmpl.render(sessiondata=cherrypy.session, peerdata=peerdata)
 
     @cherrypy.expose
     def edit(self, action='edit', id=None, description=None):
@@ -84,43 +55,52 @@ class WebApp():
             if action == 'new': # default values for new client
                 peerdata = { 'Description': description, 'Id': '' }
             else: # save changes
-                peer = self.wg.create_peer(description)
-                peerdata = self.wg.get_peer(peer)
+                raise ValueError()
         tmpl = self.jinja_env.get_template('edit.html')
-        return tmpl.render(peerdata=peerdata)
+        return tmpl.render(sessiondata=cherrypy.session, peerdata=peerdata)
 
     @cherrypy.expose
     def download(self, id):
+        """Provide the WireGuard config for the client with the given identifier for download"""
         peer, peerdata = self.wg.get_peer_byid(id)
         config, peerdata = self.wg.get_peerconfig(peer)
         cherrypy.response.headers['Content-Disposition'] = f'attachment; filename=wg_{id}.conf'
         cherrypy.response.headers['Content-Type'] = 'text/plain' # 'application/x-download' 'application/octet-stream'
         return config.encode('utf-8')
 
-    @cherrypy.expose
-    def logout(self):
-          username = cherrypy.session['username']
-          cherrypy.session.clear()
-          return '"{0}" has been logged out'.format(username)
-
-
-
-def run_webapp(cfg):
-
-    def check_username_and_password(username, password):
+    def check_username_and_password(self, username, password):
         """Check whether provided username and password are valid when authenticating"""
-        if (username in cfg.users) and (pwdtools.verify_password(cfg.users[username], password)):
+        if (username in self.cfg.users) and (pwdtools.verify_password(self.cfg.users[username], password)):
             return
         return 'invalid username/password'
 
+    def login_screen(self, from_page='..', username='', error_msg='', **kwargs):
+        """Shows a login form"""
+        tmpl = self.jinja_env.get_template('login.html')
+        return tmpl.render(from_page=from_page, username=username, error_msg=error_msg).encode('utf-8')
+
+    @cherrypy.expose
+    def logout(self):
+        username = cherrypy.session['username']
+        cherrypy.session.clear()
+        cherrypy.response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        cherrypy.response.headers['Pragma'] = 'no-cache'
+        cherrypy.response.headers['Expires'] = '0'
+        raise cherrypy.HTTPRedirect('/', 302)        
+        return '"{0}" has been logged out'.format(username)
+
+
+def run_webapp(cfg):
+    """Runs the CherryPy web application with the provided configuration data"""
     script_path = os.path.dirname(os.path.abspath(__file__))
-    conf = {
+    app = WebApp(cfg)
+    app_conf = {
         '/': {
             'tools.sessions.on': True,
             'tools.staticdir.root': os.path.join(script_path, 'webroot'),
-#            'tools.session_auth.on': True,
-            'tools.session_auth.login_screen': login_screen,
-            'tools.session_auth.check_username_and_password': check_username_and_password,
+            'tools.session_auth.on': True,
+            'tools.session_auth.login_screen': app.login_screen,
+            'tools.session_auth.check_username_and_password': app.check_username_and_password,
             },
         '/configs': {
             'tools.staticdir.on': True,
@@ -128,11 +108,13 @@ def run_webapp(cfg):
             'tools.staticdir.dir': cfg.libdir
         },
         '/static': {
+            'tools.session_auth.on': False,
             'tools.staticdir.on': True,
             'tools.staticdir.dir': 'static'
         },
         '/favicon.ico':
         {
+            'tools.session_auth.on': False,
             'tools.staticfile.on': True,
             'tools.staticfile.filename': os.path.join(script_path, 'webroot', 'static', 'favicon.ico')
         }
@@ -144,7 +126,7 @@ def run_webapp(cfg):
     cherrypy.config.update({'server.socket_host': '0.0.0.0',
                             'server.socket_port': 8080,
                            })
-    cherrypy.quickstart(WebApp(cfg), '/', conf)
+    cherrypy.quickstart(app, '/', app_conf)
 
 
 if __name__ == '__main__':

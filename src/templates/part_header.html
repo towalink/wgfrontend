@@ -1,3 +1,9 @@
-<div class='heading'>
-  <h2><a href='/'>Towalink WireGuard Frontend</a></h2>
-</div>
+  <header>
+    <h2><a href="/"><img src="static/logo.svg" alt="Towalink logo"><span>Towalink WireGuard Frontend</span></a></h2>
+    <div class="user">
+      <p>{% if sessiondata['username'] %}{{ sessiondata['username'] }}{% else %}not logged in{%endif %}</p>
+      <form action="/logout">
+        <input class="button" type="submit" value="Logout" />
+      </form>
+    </div>
+  </header>

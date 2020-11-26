@@ -1,15 +1,20 @@
-<html>
-  <head>
-    <meta http-equiv='content-type' content='text/html; charset=utf-8' />
-    <title>Towalink WireGuard Frontend</title>
-    <link rel='stylesheet' media='screen' href='/static/layout.css' />
-  </head>
-  <body>
-    <div class='container'>
-      <div class='header'>
-        {% include 'part_header.html' %}
-      </div>
-      <div class='content'>{% block content %}{% endblock %}</div>      
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Towalink WireGuard Frontend</title>
+  <link rel="stylesheet" media="screen" href="/static/styles.css" />
+</head>
+<body>
+{% include 'part_header.html' %}
+  <section>
+    <div class="content">
+      {%- block content %}{% endblock %}
     </div>
-  </body>
+  </section>
+  <footer>
+    <a href="https://github.com/towalink/wgfrontend/" target="_blank">Powered by the open source &quot;Towalink WireGuard Frontend&quot;</a>
+  </footer>
+</body>
 </html>

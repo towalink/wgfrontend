@@ -1,23 +1,35 @@
 {% extends 'base.html' %}
 {% block content %}
-  <h3>Configured Clients</h3>
-  <div class='span-18 last'>
-    <form method="get" action="edit">
-      <button type="submit" name="action" value="new">Add Client</button>
-      <table>
-      {%- for peer, peerdata in peers.items()|sort(attribute='1.Description') %}
-        <tr>
-          <td>
-            {{ peerdata['Description'] }}<br>
-            {{ peerdata['Address'] }}
-          </td>
-          <td>
-            <button type="submit" name="id" value="{{ peerdata['Id'] }}">Edit Client</button>
-            <button type="submit" name="id" value="{{ peerdata['Id'] }}" formaction="config">Get Config</button>
-          </td>
-        </tr>
-      {%- endfor %}
-      </table>
-    </form>
-  </div>
+      <h3>Configured Clients</h3>
+      <div class='form'>
+        <form method="get" action="edit">
+          <div class="buttonrow">
+            <button class="button buttonhighlight" type="submit" name="action" value="new">Add Client</button>
+          </div>
+          <div class="table">
+          {%- for peer, peerdata in peers.items()|sort(attribute='1.Description') %}
+            <div class="line"></div>
+            <div class="table-row">
+              <div class="table-cell bordertop">
+                {{ peerdata['Description'] }}<br>
+                <small>{{ peerdata['Address'] }}</small>
+              </div>
+              <div class="table-cell twobuttoncell bordertop2">
+                <button class="button" type="submit" name="id" value="{{ peerdata['Id'] }}">Edit Client</button>
+                <button class="button" type="submit" name="id" value="{{ peerdata['Id'] }}" formaction="config">Get Config</button>
+              </div>
+            </div>
+          {%- endfor %}
+          {% if not peers %}
+          <div class="table">
+            <div class="line"></div>
+            <div class="table-row">
+              <div class="table-cell bordertop">
+                There is no client configured up to now.         
+              </div>
+            </div>
+          {% endif %}
+          </div>
+        </form>
+      </div>
 {% endblock %}
