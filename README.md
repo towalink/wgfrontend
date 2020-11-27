@@ -47,8 +47,15 @@ Note that the changes done by wgfrontend in the WireGuard configuration file do 
 
 ---
 
-## Details
+## Screenshots
 
+![screenshot: show a client config](https://raw.githubusercontent.com/towalink/wgfrontend/main/screenshots/show.png "Show a client config")
+
+See additional screenshots in the "screenshots" folder.
+
+---
+
+## Details
 
 ### The wgfrontend configuration file
 
@@ -100,7 +107,7 @@ Clone this repo to your local machine using `https://github.com/towalink/wgfront
 
 Install the module temporarily to make it available in your Python installation:
 ```shell
-pip3 install -e <path to root of "src" directory>
+pip3 install -e <path to directory with setup.py>
 ```
 
 ---
