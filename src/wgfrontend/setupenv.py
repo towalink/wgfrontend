@@ -10,7 +10,7 @@ import string
 import wgconfig
 import wgconfig.wgexec as wgexec
 
-import config
+from . import config
 
 
 def is_root():

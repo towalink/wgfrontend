@@ -5,7 +5,7 @@ import logging
 import os
 import textwrap
 
-import pwdtools
+from . import pwdtools
 
 
 logger = logging.getLogger(__name__)

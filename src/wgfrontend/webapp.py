@@ -8,8 +8,8 @@ import os
 import random
 import string
 
-import pwdtools
-import wgcfg
+from . import pwdtools
+from . import wgcfg
 
 
 class WebApp():

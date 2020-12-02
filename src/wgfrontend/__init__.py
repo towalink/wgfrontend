@@ -26,8 +26,8 @@ __license__ = "AGPL3" # + author has right to release in parallel under differen
 __email__ = "towalink.wgfrontend@henrici.name"
 
 
-import setupenv
-import webapp
+from . import setupenv
+from . import webapp
 
 
 def main():
