@@ -7,7 +7,7 @@ with open('README.md', 'r') as f:
 
 setup_kwargs = {
     'name': 'wgfrontend',
-    'version': '0.2.1',
+    'version': '0.2.2',
     'author': 'The Towalink Project',
     'author_email': 'pypi.wgfrontend@towalink.net',
     'description': 'web-based user interface for configuring WireGuard for roadwarriors',

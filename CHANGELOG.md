@@ -10,11 +10,27 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
-- Improve button naming when adding new client
+- n/a
 
 ### Fixed
 
 - n/a
+
+## [0.2.2] - 2020-12-02
+
+### Fixed
+
+- Also add webroot and templates in PyPi package
+
+## [0.2.1] - 2020-12-02
+
+### Changed
+
+- Improve button naming when adding new client
+
+### Fixed
+
+- PyPi packaging
 
 ## [0.2.0] - 2020-11-26
 
