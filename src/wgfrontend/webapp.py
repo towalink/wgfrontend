@@ -128,11 +128,12 @@ def run_webapp(cfg):
         }
     }
     if os.path.exists(cfg.sslcertfile) and os.path.exists(cfg.sslkeyfile):
+        # Use ssl/tls if certificate files are present
         cherrypy.server.ssl_module = 'builtin'
         cherrypy.server.ssl_certificate = cfg.sslcertfile
         cherrypy.server.ssl_private_key = cfg.sslkeyfile
-    cherrypy.config.update({'server.socket_host': '0.0.0.0',
-                            'server.socket_port': 8080,
+    cherrypy.config.update({'server.socket_host': cfg.socket_host,
+                            'server.socket_port': cfg.socket_port,
                            })
     cherrypy.tree.mount(app, config=app_conf)
     if setupenv.is_root():

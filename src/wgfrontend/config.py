@@ -53,6 +53,12 @@ class Configuration():
         # The command to be executed when the WireGuard config has changed
         # on_change_command =
         # Example: on_change_command = "sudo /etc/init.d/wgfrontend_interface restart"
+
+        # The interface to bind to for the web server
+        # socket_host = 0.0.0.0
+
+        # The port to bind to for the web server
+        # socket_port = 8080
         
         # The system user to be used for the frontend
         user = {user}
@@ -110,6 +116,16 @@ class Configuration():
     def on_change_command(self):
         """The command to be executed on config changes"""
         return self.config.get('on_change_command')
+
+    @property
+    def socket_host(self):
+        """The interface to bind to"""
+        return self.config.get('socket_host', '0.0.0.0')
+
+    @property
+    def socket_port(self):
+        """The port to bind to"""
+        return int(self.config.get('socket_port', 8080))
 
     @property
     def user(self):
