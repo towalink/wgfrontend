@@ -107,20 +107,34 @@ def setup_environment():
             user = input(f'2b) Please specify the system user for the web frontend [wgfrontend]: ')
             ok = False
             while not ok:
-                username = input(f'2c) Please specify the username for your web frontend user [admin]: ')
+                socket_host = input(f'2c) Please specify the listening interface for the web server [0.0.0.0]: ')
+                if check_validcharacters(socket_host, string.hexdigits + '.:'):
+                    ok = True
+                else:
+                    print('    Invalid characters entered. Please enter anew.')
+            ok = False
+            while not ok:
+                socket_port = input(f'2d) Please specify the listening port for the web server [8080]: ')
+                if (not socket_port.strip()) or socket_port.isdigit():
+                    ok = True
+                else:
+                    print('    You need to provide a port number. Please enter anew.')            
+            ok = False
+            while not ok:
+                username = input(f'2e) Please specify the username for your web frontend user [admin]: ')
                 if check_validcharacters(username, string.ascii_letters + '_'):
                     ok = True
                 else:
                     print('    Username must only contain letters and underscores. Please enter anew.')
             ok = False
             while not ok:
-                password = input(f'2d) Please specify the password for your web frontend user: ')
+                password = input(f'2f) Please specify the password for your web frontend user: ')
                 if len(password) >= 8:
                     ok = True
                 else:
                     print('    Password must have at least eight characters. Please enter anew.')            
             touch_file(cfg.filename, perm=0o640) # create without world read permissions
-            cfg.write_config(wg_configfile=wg_configfile, user=user, users={username: password})
+            cfg.write_config(wg_configfile=wg_configfile, socket_host=socket_host, socket_port=socket_port, user=user, users={username: password})
             print('    Config file written. Ok.')
         print(f'3)  Ensuring that system user "{cfg.user}" exists.')
         ensure_user(cfg.user)

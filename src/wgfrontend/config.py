@@ -33,11 +33,15 @@ class Configuration():
             logger.warning('Config file [{0}] could not be read [{1}], using defaults'.format(self.filename, str(e)))
             self._config = dict()
     
-    def write_config(self, wg_configfile='', user='', users={}):
+    def write_config(self, wg_configfile='', socket_host='0.0.0.0', socket_port=8080, user='', users={}):
         """Writes a new config file with the given attributes"""
         # Set default values
         if not wg_configfile.strip():
             wg_configfile = '/etc/wireguard/wg_rw.conf'
+        if not socket_host.strip():
+            socket_host = '0.0.0.0'
+        if not str(socket_port).strip():
+            socket_port = 8080
         if not user.strip():
             user = 'wgfrontend'
         users = { username if username.strip() else 'admin': password for username, password in users.items() }
@@ -48,19 +52,23 @@ class Configuration():
         ### Config file of the Towalink WireGuard Frontend ###
         [general]
         # The WireGuard config file to read and write
+        # wg_configfile = /etc/wireguard/wg_rw.conf
         wg_configfile = {wg_configfile}
 
         # The command to be executed when the WireGuard config has changed
         # on_change_command =
-        # Example: on_change_command = "sudo /etc/init.d/wgfrontend_interface restart"
+        # Example:  on_change_command = "sudo /etc/init.d/wgfrontend_interface restart"
 
-        # The interface to bind to for the web server
+        # The interface the web server shall bind to
         # socket_host = 0.0.0.0
+        socket_host = {socket_host}
 
-        # The port to bind to for the web server
+        # The port the web server shall bind to
         # socket_port = 8080
+        socket_port = {socket_port}
         
         # The system user to be used for the frontend
+        # user = wgfrontend
         user = {user}
         
         [users]
@@ -115,7 +123,9 @@ class Configuration():
     @property
     def on_change_command(self):
         """The command to be executed on config changes"""
-        return self.config.get('on_change_command')
+        cmd = self.config.get('on_change_command')
+        cmd = cmd.strip('"\'')
+        return cmd
 
     @property
     def socket_host(self):
