@@ -16,10 +16,11 @@ logger = logging.getLogger(__name__)
 class WGCfg():
     """Class for reading/writing the WireGuard configuration file"""
 
-    def __init__(self, filename, libdir):
+    def __init__(self, filename, libdir, on_change_func=None):
         """Initialize instance for the given config file"""
         self.filename = filename
         self.libdir = libdir
+        self.on_change_func = on_change_func
         self.wc = wgconfig.WGConfig(self.filename)
         self.wc.read_file()
 
@@ -108,6 +109,7 @@ class WGCfg():
         self.wc.add_attr(peer, 'PersistentKeepalive', 25)
         self.wc.write_file()
         self.write_qrcode(peer)
+        self.config_change_done()
         return peer
         
     def update_peer(self, peer, description):
@@ -119,12 +121,15 @@ class WGCfg():
         self.wc.lines[first_line] = '# ' + description
         self.wc.invalidate_data()
         self.wc.write_file()
+        self.write_qrcode(peer)
+        self.config_change_done()
         return self.get_peer(peer)
         
     def delete_peer(self, peer):
         """Delete the given peer"""
         self.wc.del_peer(peer)
         self.wc.write_file()
+        self.config_change_done()
        
     def find_free_ip(self):
         """Find the first free address in the given network"""
@@ -154,6 +159,11 @@ class WGCfg():
         qr.make(fit=True)
         img = qr.make_image(fill_color='black', back_color='white')
         img.save(peerdata['QRCode'])
+
+    def config_change_done(self):
+        """React on config changes"""
+        if self.on_change_func is not None:
+            self.on_change_func()
 
 
 if __name__ == '__main__':
