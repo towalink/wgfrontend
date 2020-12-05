@@ -16,6 +16,16 @@ All notable changes to this project are documented in this file.
 
 - n/a
 
+## [0.3.1] - 2020-12-05
+
+### Added
+
+- Ask for listening interface and port in setup assistant
+
+### Changed
+
+- Strip quotes from on_change_command
+
 ## [0.3.0] - 2020-12-05
 
 ### Added
