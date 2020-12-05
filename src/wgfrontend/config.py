@@ -124,7 +124,8 @@ class Configuration():
     def on_change_command(self):
         """The command to be executed on config changes"""
         cmd = self.config.get('on_change_command')
-        cmd = cmd.strip('"\'')
+        if cmd is not None:
+            cmd = cmd.strip('"\'')
         return cmd
 
     @property
