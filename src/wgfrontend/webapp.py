@@ -7,6 +7,7 @@ import jinja2
 import os
 import random
 import string
+import subprocess
 
 from . import pwdtools
 from . import wgcfg
@@ -18,7 +19,7 @@ class WebApp():
         """Instance initialization"""
         self.cfg = cfg
         self.jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')))
-        self.wg = wgcfg.WGCfg(self.cfg.wg_configfile, self.cfg.libdir)
+        self.wg = wgcfg.WGCfg(self.cfg.wg_configfile, self.cfg.libdir, self.on_change_func)
 
     @cherrypy.expose
     def index(self, action=None, id=None, description=None):
@@ -88,6 +89,12 @@ class WebApp():
         cherrypy.response.headers['Expires'] = '0'
         raise cherrypy.HTTPRedirect('/', 302)        
         return '"{0}" has been logged out'.format(username)
+
+    def on_change_func(self):
+        """React on config changes"""
+        on_change_command = self.cfg.on_change_command
+        if (on_change_command is not None) and (len(on_change_command) > 0):
+            subprocess.call(on_change_command, shell=True)
 
 
 def run_webapp(cfg):
