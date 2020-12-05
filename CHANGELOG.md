@@ -16,6 +16,16 @@ All notable changes to this project are documented in this file.
 
 - n/a
 
+## [0.3.2] - 2020-12-05
+
+### Changed
+
+- Start CherryPy in environment "staging"
+
+### Fixed
+
+- Traceback when on_change_command is not set
+
 ## [0.3.1] - 2020-12-05
 
 ### Added
