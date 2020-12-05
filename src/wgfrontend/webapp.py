@@ -10,6 +10,7 @@ import string
 import subprocess
 
 from . import pwdtools
+from . import setupenv
 from . import wgcfg
 
 
@@ -133,7 +134,14 @@ def run_webapp(cfg):
     cherrypy.config.update({'server.socket_host': '0.0.0.0',
                             'server.socket_port': 8080,
                            })
-    cherrypy.quickstart(app, '/', app_conf)
+    cherrypy.tree.mount(app, config=app_conf)
+    if setupenv.is_root():
+        # Drop privileges
+        uid, gid = setupenv.get_uid_gid(cfg.user, cfg.user)
+        cherrypy.process.plugins.DropPrivileges(cherrypy.engine, umask=0o022, uid=uid, gid=gid).subscribe()
+    cherrypy.engine.start()
+    cherrypy.engine.signals.subscribe()
+    cherrypy.engine.block()
 
 
 if __name__ == '__main__':

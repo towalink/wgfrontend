@@ -68,13 +68,18 @@ def chown(username, path):
     uid = pwd.getpwnam(username).pw_uid
     os.chown(path, uid, -1)
 
-def drop_privileges(uid_name='nobody', gid_name='nogroup'):
-    """"""
-    if not is_root():
-        raise ValueError('No privileges present to drop')
+def get_uid_gid(uid_name='nobody', gid_name='nogroup'):
+    """Returns uid and gid for the given username and groupname"""
     uid = pwd.getpwnam(uid_name).pw_uid
     gid = grp.getgrnam(gid_name).gr_gid
-#    os.setgroups([]) # remove group privileges
+    return uid, gid
+
+def drop_privileges(uid_name='nobody', gid_name='nogroup'):
+    """Drop privileges towards the given username and groupname"""
+    if not is_root():
+        raise ValueError('No privileges present to drop')
+    uid, gid = get_uid_gid(uid_name, gid_name) 
+    os.setgroups([]) # remove group privileges
     os.setgid(gid)
     os.setuid(uid)
 
@@ -168,8 +173,6 @@ def setup_environment():
         print(f'8d) Ensuring ownership of server private key file {cfg.sslkeyfile} in case it exists.')
         if os.path.exists(cfg.sslkeyfile):
             chown(cfg.user, cfg.sslkeyfile)
-        print(f'9)  Dropping root privileges to user/group "{cfg.user}".')
-        drop_privileges(cfg.user, cfg.user)
         print(f'Attempting to start web frontend...')
     return cfg
 
