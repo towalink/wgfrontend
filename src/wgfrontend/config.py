@@ -49,6 +49,10 @@ class Configuration():
         [general]
         # The WireGuard config file to read and write
         wg_configfile = {wg_configfile}
+
+        # The command to be executed when the WireGuard config has changed
+        # on_change_command =
+        # Example: on_change_command = "sudo /etc/init.d/wgfrontend_interface restart"
         
         # The system user to be used for the frontend
         user = {user}
@@ -101,6 +105,11 @@ class Configuration():
     def libdir(self):
         """The directory for the generated config files"""
         return '/var/lib/wgfrontend'
+
+    @property
+    def on_change_command(self):
+        """The command to be executed on config changes"""
+        return self.config.get('on_change_command')
 
     @property
     def user(self):
