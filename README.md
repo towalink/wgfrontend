@@ -30,6 +30,15 @@ Install using PyPi:
 pip3 install wgfrontend
 ```
 
+Note: In the case you get an error regarding the imaging library needed for generating QR Codes, try to install it via the operating system packages:
+
+```shell
+# For Alpine:
+apk add py3-pillow
+# For Debian:
+apt install python3-pil
+```
+
 ---
 
 ## Quickstart
@@ -68,6 +77,15 @@ Here is an example:
 [general]
 # The WireGuard config file to read and write
 wg_configfile = /etc/wireguard/wg_rw.conf
+
+# The command to be executed when the WireGuard config has changed
+on_change_command = "sudo /etc/init.d/wgfrontend_interface restart"
+
+# The interface to bind to for the web server
+socket_host = 0.0.0.0
+
+# The port to bind to for the web server
+socket_port = 8080
 
 # The system user to be used for the frontend
 user = wgfrontend

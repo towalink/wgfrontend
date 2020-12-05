@@ -16,6 +16,19 @@ All notable changes to this project are documented in this file.
 
 - n/a
 
+## [0.3.0] - 2020-12-05
+
+### Added
+
+- Execute a user-defined command on config changes
+- Drop root privileges after binding to listening port
+- Allow specifying bind interface and listening port in config file
+
+### Fixed
+
+- Update QR code also on description change
+- Create QR code image directory (/var/lib/wgfrontend) with correct permissions
+
 ## [0.2.2] - 2020-12-02
 
 ### Fixed

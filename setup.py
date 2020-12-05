@@ -7,7 +7,7 @@ with open('README.md', 'r') as f:
 
 setup_kwargs = {
     'name': 'wgfrontend',
-    'version': '0.2.2',
+    'version': '0.3.0',
     'author': 'The Towalink Project',
     'author_email': 'pypi.wgfrontend@towalink.net',
     'description': 'web-based user interface for configuring WireGuard for roadwarriors',
@@ -19,7 +19,7 @@ setup_kwargs = {
     'include_package_data': True,
     'install_requires': ['cherrypy',
                          'jinja2',
-                         'qrcode',
+                         'qrcode[pil]',
                          'wgconfig'
                         ],
     'entry_points': '''
