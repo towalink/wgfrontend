@@ -125,7 +125,7 @@ def setup_environment():
             print(f'5)  Directory {cfg.libdir} already exists. Ok.')
         else:
             print(f'5)  Directory {cfg.libdir} does not yet exist. Let\'s create it...')
-            os.makedirs(cfg.libdir, mode=0o640, exist_ok=True)
+            os.makedirs(cfg.libdir, mode=0o750, exist_ok=True)
             print('    Directory created. Ok.')
         print(f'6)  Ensuring ownership of directory {cfg.libdir}.')
         chown(cfg.user, cfg.libdir)
