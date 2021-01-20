@@ -137,7 +137,6 @@ class WGCfg():
         network = interface_address.network
         interface_address = interface_address.ip
         addresses = [ ipaddress.ip_interface(peerdata['Address']).ip for peer, peerdata in self.get_peers().items() ]
-        print(addresses) # ***
         ip = None
         for addr in network.hosts():
             if addr == interface_address:
