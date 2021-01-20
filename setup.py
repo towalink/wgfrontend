@@ -32,8 +32,7 @@ setup_kwargs = {
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)',
         'Operating System :: POSIX :: Linux',
-        'Development Status :: 3 - Alpha',
-        #'Development Status :: 4 - Beta',
+        'Development Status :: 4 - Beta',
         #'Development Status :: 5 - Production/Stable',
         'Intended Audience :: System Administrators',
         'Intended Audience :: Information Technology',
@@ -41,7 +40,7 @@ setup_kwargs = {
         'Topic :: System :: Networking'
     ],
     'python_requires': '>=3.6',
-    'keywords': 'Towalink VPN webfrontend WireGuard',
+    'keywords': 'Towalink VPN WireGuard frontend gui',
     'project_urls': {
         'Project homepage': 'https://www.towalink.net',
         'Repository': 'https://www.github.com/towalink/wgfrontend',
