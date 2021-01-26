@@ -106,6 +106,11 @@ class Configuration():
         return self.config.get('wg_configfile', '/etc/wireguard/wg_rw.conf')
 
     @property
+    def wg_interface(self):
+        """The name of the WireGuard interface derived from the name of the WireGuard config file"""
+        return os.path.basename(self.wg_configfile).rpartition('.')[0] # filename without extension
+
+    @property
     def sslcertfile(self):
         """The filename incl. path for the server certificate"""
         return os.path.join(os.path.dirname(self.filename), 'server.pem')
