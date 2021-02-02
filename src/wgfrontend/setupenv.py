@@ -198,6 +198,8 @@ def setup_environment():
                 wg_listenport = 51820
             ok = False
             while not ok:
+                print('   You need to specify the endpoint hostname (and optionally port) to reach your WireGuard server.')
+                print('   In a home environment, this is usually a DynDNS name denoting your Internet router.')
                 endpoint = input('7b) Please specify the endpoint hostname (and optionally port) to reach your WireGuard server: ')
                 if len(endpoint) > 0:
                     ok = True
