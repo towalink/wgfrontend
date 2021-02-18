@@ -14,9 +14,9 @@ def get_startupscript_wgfrontend():
     template = r'''
         #!/sbin/openrc-run
         
-        depend() {{
+        depend() {
                 need net
-        }}
+        }
         
         name=$RC_SVCNAME
         command="wgfrontend"
