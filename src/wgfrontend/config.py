@@ -49,30 +49,30 @@ class Configuration():
         password = pwdtools.hash_password(users[username])
         # Config file content
         config_content = textwrap.dedent(f'''\
-        ### Config file of the Towalink WireGuard Frontend ###
-        [general]
-        # The WireGuard config file to read and write
-        # wg_configfile = /etc/wireguard/wg_rw.conf
-        wg_configfile = {wg_configfile}
-
-        # The command to be executed when the WireGuard config has changed
-        # on_change_command =
-        # Example:  on_change_command = "sudo /etc/init.d/wgfrontend_interface restart"
-
-        # The interface the web server shall bind to
-        # socket_host = 0.0.0.0
-        socket_host = {socket_host}
-
-        # The port the web server shall bind to
-        # socket_port = 8080
-        socket_port = {socket_port}
-        
-        # The system user to be used for the frontend
-        # user = wgfrontend
-        user = {user}
-        
-        [users]
-        {username} = {password}
+            ### Config file of the Towalink WireGuard Frontend ###
+            [general]
+            # The WireGuard config file to read and write
+            # wg_configfile = /etc/wireguard/wg_rw.conf
+            wg_configfile = {wg_configfile}
+    
+            # The command to be executed when the WireGuard config has changed
+            # on_change_command = 
+            on_change_command = "sudo --non-interactive wg-quick down {wg_configfile}; sudo --non-interactive wg-quick up {wg_configfile}"
+    
+            # The interface the web server shall bind to
+            # socket_host = 0.0.0.0
+            socket_host = {socket_host}
+    
+            # The port the web server shall bind to
+            # socket_port = 8080
+            socket_port = {socket_port}
+            
+            # The system user to be used for the frontend
+            # user = wgfrontend
+            user = {user}
+            
+            [users]
+            {username} = {password}
         ''')
         # Write to file system
         try:
@@ -130,7 +130,8 @@ class Configuration():
         """The command to be executed on config changes"""
         cmd = self.config.get('on_change_command')
         if cmd is not None:
-            cmd = cmd.strip('"\'')
+            if cmd[0] in ['"', '\'']:
+                cmd = cmd[1:-1]
         return cmd
 
     @property
