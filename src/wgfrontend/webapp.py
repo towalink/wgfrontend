@@ -4,6 +4,7 @@
 
 import cherrypy
 import jinja2
+import logging
 import os
 import random
 import string
@@ -95,7 +96,9 @@ class WebApp():
         """React on config changes"""
         on_change_command = self.cfg.on_change_command
         if (on_change_command is not None) and (len(on_change_command) > 0):
-            subprocess.call(on_change_command, shell=True)
+            returncode = subprocess.call(on_change_command, shell=True)
+            if returncode != 0:
+                cherrypy.log('Error calling on_change_command', context='WEBAPP', severity=logging.ERROR, traceback=False)
 
 
 def run_webapp(cfg):
