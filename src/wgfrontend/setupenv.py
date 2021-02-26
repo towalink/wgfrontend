@@ -9,6 +9,7 @@ import os
 import pwd
 import string
 import subprocess
+import textwrap
 import wgconfig
 import wgconfig.wgexec as wgexec
 
@@ -119,7 +120,8 @@ class QueryUser():
         """Queries the user for a yes or no answer"""
         while True:
             answer = input(f'  {display_text} ')
-            if not answer.strip():
+            answer = answer.strip()
+            if not answer:
                 answer = default
             answer = answer.lower()
             if answer in ['1', 'y', 'yes']:
@@ -130,7 +132,7 @@ class QueryUser():
 
     def query_expert(self):
         """Queries the user on whether he wants expert configuration"""
-        expert = self.input_yes_no('Do you want to use expert configuration? [No]:', default='No')        
+        expert = self.input_yes_no('Do you want to use expert configuration? [No]:', default='No')
         return expert
 
     @property
@@ -340,6 +342,16 @@ def setup_environment():
             wc.write_file()
             print('  Config file written. Ok.')
             eh = exechelper.ExecHelper()
+            if qu.input_yes_no(f'Would you like to allow the system user of the web frontend to reload WireGuard on config on changes (using sudo)? [Yes]:'):
+                sudoers_content = textwrap.dedent(f'''\
+                    {cfg.user}  ALL=(root) NOPASSWD: /etc/init.d/wgfrontend_interface start, /etc/init.d/wgfrontend_interface stop, /etc/init.d/wgfrontend_interface restart
+                    {cfg.user}  ALL=(root) NOPASSWD: /usr/bin/wg-quick down {cfg.wg_configfile}, /usr/bin/wg-quick up {cfg.wg_configfile}
+                ''')    
+                if os.path.isdir('/etc/sudoers.d'):
+                    with open('/etc/sudoers.d/wgfrontend', 'w') as sudoers_file:
+                        sudoers_file.write(sudoers_content)
+                else:
+                    print('  Sorry, "/etc/sudoers.d" does not exist so that sudo could not be configured. Maybe "sudo" is not installed.')
             if qu.input_yes_no(f'Would you like to activate the WireGuard interface "{cfg.wg_interface}" now? [Yes]:'):
                 eh.run_wgquick('up', cfg.wg_interface)
             if qu.input_yes_no(f'Would you like to activate the WireGuard interface "{cfg.wg_interface}" on boot? [Yes]:'):
