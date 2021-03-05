@@ -4,8 +4,6 @@ A simple web frontend for configuring peers within a WireGuard configuration fil
 
 There are already a lot of user interfaces for administering WireGuard configuration files available. However, many of them have a bunch of dependencies, require root privileges to operate, or are a hassle to set up. "wgfrontend" provides a user interface that can be easily installed by just installing a package from Python's package repository PyPi (i.e. using pip).
 
-IMPORTANT NOTE: This tool is still in development stage. Bug reports are appreciated.
-
 This little tool is independent of the Towalink site connectivity solution (see https://towalink.readthedocs.io).
 
 ---
@@ -51,8 +49,6 @@ wgfrontend
 
 An interactive set-up assistant queries for the needed configuration data and sets up the environment.
 Once everything is configured, "wgfrontend" drops root privileges and runs a small web server on port 8080 to serve the web frontend.
-
-Note that the changes done by wgfrontend in the WireGuard configuration file do not take affect automatically. The new configuration needs to be taken over to the WireGuard interface manually. Automating this is on the roadmap.
 
 ---
 
@@ -117,6 +113,7 @@ The wgfrontend web server does not run with root permissions. That's a start and
 In case you encounter any bugs, please report the expected behavior and the actual behavior so that the issue can be reproduced and fixed.
 
 ---
+
 ## Developers
 
 ### Clone repository
