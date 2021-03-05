@@ -255,7 +255,7 @@ class QueryUser():
                 print('  Exception: {text}'.format(text=str(e)))
             return None
 
-        return self.get_and_validate_input('Please specify the IP address of the WireGuard interface incl. prefix length [192.168.0.1/24]:', default='192.168.0.1/24', check_function=check, expert_question=False)
+        return self.get_and_validate_input('Please specify the IP address of the WireGuard interface incl. prefix length [192.168.0.17/28]:', default='192.168.0.17/28', check_function=check, expert_question=False)
 
     def get_wg_networks(self):
         """Query the user for the network ranges that the clients shall route to the WireGuard server"""
@@ -312,6 +312,8 @@ def setup_environment():
             print('  https://github.com/towalink/wgfrontend/tree/main/doc/network-integration')
             print('  Automated configuration is only supported for the ProxyARP setup.')
             print('  For this, choose an unused subrange of your local network for WireGuard.')
+            print('  If your local network were 192.168.0.0/24, you could use the subrange')
+            print('  192.168.0.16/28 with 192.168.0.17/28 as the WireGuard interface address.')
             print('  Press enter to select defaults.')
             wg_listenport = qu.get_wg_listenport()
             endpoint = qu.get_endpoint()
@@ -363,7 +365,34 @@ def setup_environment():
                 if eh.os_id == 'alpine':
                     setupenv_alpine.start_wgfrontend_onboot()
                 else:
-                    print('  Sorry, this can\'t be configured by this assistant on your platform yet.')
+                    # Create and install systemd service
+                    systemd_content = textwrap.dedent(f'''\
+                        [Unit]
+                        Description=wgfrontend service
+                        After=network-online.target
+                        Wants=network-online.target
+                        
+                        [Service]
+                        Type=simple
+                        ExecStart=wgfrontend
+                        User={cfg.user}
+                        Group={cfg.user}
+                        StandardOutput=append:/var/log/wgfrontend.log
+                        StandardError=inherit
+                        # journalctl -u sh-dimplex
+                        #StandardOutput=syslog
+                        #StandardError=syslog
+                        
+                        [Install]
+                        WantedBy=multi-user.target
+                    ''')    
+                    if os.path.isdir('/etc/systemd/system'):
+                        with open('/etc/systemd/system/smarthome.service', 'w') as systemd_file:
+                            systemd_file.write(systemd_content)  
+                        eh.execute('systemctl daemon-reload', suppressoutput=True, suppresserrors=True)
+                        eh.enable_service('wgfrontend')
+                    else:
+                        print('  Sorry, "/etc/systemd/system" does not exist so that the service file could not be installed.')
         print(f'Ensuring list permission of WireGuard config directory {os.path.dirname(cfg.wg_configfile)}.')
         os.chmod(os.path.dirname(cfg.wg_configfile), 0o711)
         print(f'Ensuring ownership of WireGuard config file {cfg.wg_configfile}.')
