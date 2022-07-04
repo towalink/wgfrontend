@@ -14,7 +14,73 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
-- n/a
+- Use UNIX line endings in wrapper file
+
+## [0.9.2] - 2021-11-20
+
+### Fixed
+
+- Fix and clean systemd service script
+
+## [0.9.1] - 2021-11-02
+
+### Fixed
+
+- Fix file extension in /etc/sysctl.d so that file is not getting ignored
+
+## [0.9.0] - 2021-09-24
+
+### Added
+
+- Explain ip addresses for ProxyARP using addresses out of local network
+- Default value for WireGuard interface ip address out of local network
+
+## [0.8.0]
+
+### Added
+
+- Automatically configure ip forwarding if requested by user
+
+## [0.7.0] - 2021-03-05
+
+### Added
+
+- Added systemd service configuration for wgfrontend
+
+### Changed
+
+- Improve logging for on_change_command execution
+- Change indentation and strip quotes in more controlled manner
+
+## [0.6.0] - 2021-02-26
+
+### Added
+
+- Add option to install suduers config for default on_change_command
+
+## [0.5.0] - 2021-02-18
+
+### Added
+
+- Reworked setup assistant
+
+### Changed
+
+- Added some explanatory text
+
+### Fixed
+
+- Fixed extra brackets
+
+## [0.4.0] - 2021-01-26
+
+### Added
+
+- Provide more information and automation, e.g. ProxyARP setup
+
+### Fixed
+
+- Remove debug print statement
 
 ## [0.3.2] - 2020-12-05
 
