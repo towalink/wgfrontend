@@ -115,6 +115,7 @@ header h2 img {
 .user {
   color: blue;
   font-size: 14px;
+  text-align: right;
 }
 
 section {
