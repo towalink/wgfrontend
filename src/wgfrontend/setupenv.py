@@ -19,7 +19,7 @@ from . import setupenv_alpine
 
 
 def is_root():
-    """Returns whether this script is run with user is 0 (root)"""
+    """Returns whether this script is run with user id 0 (root)"""
     return os.getuid() == 0
     
 def get_user():
@@ -108,6 +108,14 @@ def get_primary_interface_addr4():
     else:
         return None
 
+def get_second_subnet():
+    """Returns the second /28 subnet of the local network as well as the local network"""
+    ip = get_primary_interface_addr4()
+    net = ipaddress.ip_interface(ip).network
+    nets = net.subnets(new_prefix=28)
+    next(nets)
+    return next(nets), net
+
 
 class QueryUser():
     """Interact with the user"""
@@ -116,8 +124,11 @@ class QueryUser():
         """Object initialization"""
         self._expert = None
 
-    def input_yes_no(self, display_text, default='Yes'):
+    def input_yes_no(self, display_text, default='Yes', expert_question=False):
         """Queries the user for a yes or no answer"""
+        if expert_question is not None:
+            if expert_question and not self.expert:
+                return default
         while True:
             answer = input(f'  {display_text} ')
             answer = answer.strip()
@@ -132,7 +143,7 @@ class QueryUser():
 
     def query_expert(self):
         """Queries the user on whether he wants expert configuration"""
-        expert = self.input_yes_no('Do you want to use expert configuration? [No]:', default='No')
+        expert = self.input_yes_no('Do you want to use expert configuration? [No]:', default='No', expert_question=None)
         return expert
 
     @property
@@ -244,7 +255,7 @@ class QueryUser():
         print('  In a home environment, this is usually a DynDNS name denoting your Internet router.')
         return self.get_and_validate_input('Please specify the endpoint hostname (and optionally port) to reach your WireGuard server:', default='', check_function=check, expert_question=False)
 
-    def get_wg_address(self):
+    def get_wg_address(self, default='192.168.0.17/28'):
         """Query the user for the IP address of the WireGuard interface incl. prefix length"""
 
         def check(userdata):
@@ -255,7 +266,7 @@ class QueryUser():
                 print('  Exception: {text}'.format(text=str(e)))
             return None
 
-        return self.get_and_validate_input('Please specify the IP address of the WireGuard interface incl. prefix length [192.168.0.17/28]:', default='192.168.0.17/28', check_function=check, expert_question=False)
+        return self.get_and_validate_input(f'Please specify the IP address of the WireGuard interface incl. prefix length [{default}]:', default=default, check_function=check, expert_question=False)
 
     def get_wg_networks(self):
         """Query the user for the network ranges that the clients shall route to the WireGuard server"""
@@ -307,17 +318,21 @@ def setup_environment():
         if os.path.exists(cfg.wg_configfile):
             print(f'WireGuard config file {cfg.wg_configfile} already exists. Ok.')
         else:
+            network_subrange, network_local = get_second_subnet()
+            ip_wgif = network_subrange[1]
             print(f'WireGuard config file {cfg.wg_configfile} does not yet exist. Let\'s create one...')
             print('  For documentation on possible setups, please refer to')
             print('  https://github.com/towalink/wgfrontend/tree/main/doc/network-integration')
             print('  Automated configuration is only supported for the ProxyARP setup.')
             print('  For this, choose an unused subrange of your local network for WireGuard.')
-            print('  If your local network were 192.168.0.0/24, you could use the subrange')
-            print('  192.168.0.16/28 with 192.168.0.17/28 as the WireGuard interface address.')
-            print('  Press enter to select defaults.')
+            print(f'  For your local network {network_local.exploded}, you could e.g. use the subrange')
+            print(f'  {network_subrange.exploded} with {ip_wgif}/{network_subrange.prefixlen} as the WireGuard interface address')
+            print(f'  and the other addresses for clients. For this, the addresses from {network_subrange.network_address}')
+            print(f'  to {network_subrange.broadcast_address} must not be in use in your network.')
+            print(f'  Press enter to select defaults.')
             wg_listenport = qu.get_wg_listenport()
             endpoint = qu.get_endpoint()
-            wg_address_obj = qu.get_wg_address()
+            wg_address_obj = qu.get_wg_address(default=ip_wgif.exploded + '/' + str(network_subrange.prefixlen))
             wg_networks = qu.get_wg_networks()
             # Check for ProxyARP setup
             proxy_arp_interface = None
@@ -327,7 +342,7 @@ def setup_environment():
                 if wg_address_obj.network.subnet_of(eth_address_obj.network):
                     interface_name = get_primary_interface()
                     print('  Setup for ProxyARP detected.')
-                    if qu.input_yes_no(f'7e) Do you want to configure ProxyARP on interface {interface_name} when bringing up the WireGuard interface? [Yes]: '):
+                    if qu.input_yes_no(f'7e) Do you want to configure ProxyARP on interface {interface_name} when bringing up the WireGuard interface? [Yes]: ', expert_question=True):
                         proxy_arp_interface = interface_name
                 else:
                     print('  Please configure your network setup based on the documentation referenced above.')
@@ -344,7 +359,19 @@ def setup_environment():
             wc.write_file()
             print('  Config file written. Ok.')
             eh = exechelper.ExecHelper()
-            if qu.input_yes_no(f'Would you like to allow the system user of the web frontend to reload WireGuard on config on changes (using sudo)? [Yes]:'):
+            if qu.input_yes_no(f'Would you like to enable IP Forwarding so that this device can act as a router? [Yes]:', expert_question=True):
+                eh.execute('sysctl -w net.ipv4.ip_forward=1', suppressoutput=True, suppresserrors=False)
+                eh.execute('sysctl -w net.ipv6.conf.all.forwarding=1', suppressoutput=True, suppresserrors=False)
+                ipforwarding_content = textwrap.dedent(f'''\
+                    net.ipv4.ip_forward = 1
+                    net.ipv6.conf.all.forwarding = 1
+                ''')
+                if os.path.isdir('/etc/sysctl.d'):
+                    with open('/etc/sysctl.d/99-wgfrontend-forwarding.conf', 'w') as ipforwarding_file:
+                        ipforwarding_file.write(ipforwarding_content)
+                else:
+                    print('  Sorry, "/etc/sysctl.d" does not exist so that we could not install a config file there.')
+            if qu.input_yes_no(f'Would you like to allow the system user of the web frontend to reload WireGuard on config changes (using sudo)? [Yes]:'):
                 sudoers_content = textwrap.dedent(f'''\
                     {cfg.user}  ALL=(root) NOPASSWD: /etc/init.d/wgfrontend_interface start, /etc/init.d/wgfrontend_interface stop, /etc/init.d/wgfrontend_interface restart
                     {cfg.user}  ALL=(root) NOPASSWD: /usr/bin/wg-quick down {cfg.wg_configfile}, /usr/bin/wg-quick up {cfg.wg_configfile}
@@ -354,14 +381,14 @@ def setup_environment():
                         sudoers_file.write(sudoers_content)
                 else:
                     print('  Sorry, "/etc/sudoers.d" does not exist so that sudo could not be configured. Maybe "sudo" is not installed.')
-            if qu.input_yes_no(f'Would you like to activate the WireGuard interface "{cfg.wg_interface}" now? [Yes]:'):
+            if qu.input_yes_no(f'Would you like to activate the WireGuard interface "{cfg.wg_interface}" now? [Yes]:', expert_question=True):
                 eh.run_wgquick('up', cfg.wg_interface)
-            if qu.input_yes_no(f'Would you like to activate the WireGuard interface "{cfg.wg_interface}" on boot? [Yes]:'):
+            if qu.input_yes_no(f'Would you like to activate the WireGuard interface "{cfg.wg_interface}" on boot? [Yes]:', expert_question=True):
                 if eh.os_id == 'alpine':
                     setupenv_alpine.start_wginterface_onboot()
                 else:
                     eh.enable_service(f'wg-quick@{cfg.wg_interface}')
-            if qu.input_yes_no(f'Would you like to start wgfrontend on boot? [Yes]:'):
+            if qu.input_yes_no(f'Would you like to start wgfrontend on boot? [Yes]:', expert_question=True):
                 if eh.os_id == 'alpine':
                     setupenv_alpine.start_wgfrontend_onboot()
                 else:
@@ -379,15 +406,12 @@ def setup_environment():
                         Group={cfg.user}
                         StandardOutput=append:/var/log/wgfrontend.log
                         StandardError=inherit
-                        # journalctl -u sh-dimplex
-                        #StandardOutput=syslog
-                        #StandardError=syslog
                         
                         [Install]
                         WantedBy=multi-user.target
                     ''')    
                     if os.path.isdir('/etc/systemd/system'):
-                        with open('/etc/systemd/system/smarthome.service', 'w') as systemd_file:
+                        with open('/etc/systemd/system/wgfrontend.service', 'w') as systemd_file:
                             systemd_file.write(systemd_content)  
                         eh.execute('systemctl daemon-reload', suppressoutput=True, suppresserrors=True)
                         eh.enable_service('wgfrontend')
