@@ -7,14 +7,14 @@ with open('README.md', 'r') as f:
 
 setup_kwargs = {
     'name': 'wgfrontend',
-    'version': '0.9.2',
+    'version': '1.0.1',
     'author': 'The Towalink Project',
     'author_email': 'pypi.wgfrontend@towalink.net',
     'description': 'web-based user interface for configuring WireGuard for roadwarriors',
     'long_description': long_description,
     'long_description_content_type': 'text/markdown',
     'url': 'https://www.github.com/towalink/wgfrontend',
-    'packages': setuptools.find_packages('src'),
+    'packages': setuptools.find_namespace_packages('src'),
     'package_dir': {'': 'src'},
     'include_package_data': True,
     'install_requires': ['cherrypy',
@@ -25,15 +25,14 @@ setup_kwargs = {
     'entry_points': '''
         [console_scripts]
         wgfrontend=wgfrontend:main
-        wgfrontend-password=pwdtools:hash_password_interactively
+        wgfrontend-password=wgfrontend.pwdtools:hash_password_interactively
     ''',
     'classifiers': [
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)',
         'Operating System :: POSIX :: Linux',
-        'Development Status :: 4 - Beta',
-        #'Development Status :: 5 - Production/Stable',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: System Administrators',
         'Intended Audience :: Information Technology',
         'Intended Audience :: Telecommunications Industry',

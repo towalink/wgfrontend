@@ -10,7 +10,27 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Log successful and failed login attempts
+
+### Fixed
+
+- n/a
+
+## [1.0.1] - 2024-05-04
+
+### Fixed
+
+- Allow non-ssl login in case SSL/TLS is not used
+- Fix wgfrontend-password module import
+
+## [1.0.0] - 2024-05-04
+
+### Changed
+
+- No longer show footer in case scrollbar is needed
+- Avoid setuptools warning on packetization
 - Add session security headers
+- Consider production ready after multiple years of use
 
 ### Fixed
 
