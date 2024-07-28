@@ -22,13 +22,36 @@ This little tool is independent of the Towalink site connectivity solution (see 
 
 ## Installation
 
-Install using PyPi:
+Make sure that WireGuard is available and its tools are installed:
+
+```shell
+# For Alpine:
+apk add wireguard wireguard-tools
+# For Debian:
+apt install wireguard wireguard-tools
+```
+
+Install as root user using PyPi:
 
 ```shell
 pip3 install wgfrontend
 ```
 
-Note: In the case you get an error regarding the imaging library needed for generating QR Codes, try to install it via the operating system packages:
+Note that this no longer works in more recent environments as `pip3` should no longer install in the system environment. You may do
+
+```shell
+pip3 install wgfrontend --break-system-packages
+```
+
+to override. Alternatively use `pipx` (install via `apt install pipx` on Debian) like this:
+
+```shell
+PIPX_HOME=/opt/pipx PIPX_BIN_DIR=/usr/bin pipx install wgfrontend
+```
+
+You may use another directory than `/opt/pipx` but it must be accessible for the regular user that will run `wgfrontend` later (i.e. don't use the default directory located within the root home directory). `PIPX_BIN_DIR` needs to be in the system search path (`systemd-path search-binaries-default` on Debian).
+
+Note: In case you get an error regarding the imaging library needed for generating QR Codes, try to install it via the operating system packages:
 
 ```shell
 # For Alpine:
@@ -49,6 +72,8 @@ wgfrontend
 
 An interactive set-up assistant queries for the needed configuration data and sets up the environment.
 Once everything is configured, "wgfrontend" drops root privileges and runs a small web server on port 8080 to serve the web frontend.
+
+Note: You may run the set-up assistant from scratch after deleting the configuration files (see the details below) manually.
 
 ---
 
